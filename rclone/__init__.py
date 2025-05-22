@@ -1,1 +1,1 @@
-from rclone.main import rclone
+from rclone.main import Rclone
