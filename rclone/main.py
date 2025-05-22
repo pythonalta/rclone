@@ -39,98 +39,103 @@ class Rclone:
         core_cmd = f'rclone --config {self.conf_file} {command}'
         return envs, core_cmd
 
-    def exec(self, command=""):
-        envs, command_ = self.cmd(command=command)
-        err, out = Rclone.__run(command=command_, envs=envs)
-        if err:
-            raise RCloneErr(f'Could not create the directory: {err}')
-        if out:
-            print(out)
-
-    def mkd(self, path=""):
-        envs, command = self.cmd(command=f'mkdir {path}')
-        err, out = Rclone.__run(command=command, envs=envs)
-        if err:
-            raise RCloneErr(f'Could not create the directory: {err}')
-        if out:
-            print(out)
-
-    def ls(self, path=""):
-        envs, command = self.cmd(command=f'lsjson {path}')
+    def ls(self, bucket="", path=""):
+        rclone_path = f'{self.remote}:{bucket}/{path}'
+        envs, command = self.cmd(command=f'lsjson {rclone_path}')
         err, out = Rclone.__run(command=command, envs=envs)
         if err:
             raise RCloneErr(f'Could not list files: {err}')
         if out:
             return json.loads(out)
 
-    def lsd(self, path=""):
-        envs, command = self.cmd(command=f'lsjson --dirs-only {path}')
+    def lsd(self, bucket="", path=""):
+        rclone_path = f'{self.remote}:{bucket}/{path}'
+        envs, command = self.cmd(command=f'lsjson --dirs-only {rclone_path}')
         err, out = Rclone.__run(command=command, envs=envs)
         if err:
             raise RCloneErr(f'Could not list the directories: {err}')
         if out:
             return json.loads(out)
 
-    def lsf(self, path=""):
-        envs, command = self.cmd(command=f'lsjson --files-only {path}')
+    def lsf(self, bucket="", path=""):
+        rclone_path = f'{self.remote}:{bucket}/{path}'
+        envs, command = self.cmd(command=f'lsjson --files-only {rclone_path}')
         err, out = Rclone.__run(command=command, envs=envs)
         if err:
             raise RCloneErr(f'Could not list the files: {err}')
         if out:
             return json.loads(out)
 
-    def cp(self, source="", target="", public=False):
+    def exists(self, bucket="", dir_path="", name=""):
+        rclone_path = f'{self.remote}:{bucket}/{dir_path}'
+        try:
+            files = self.ls(bucket=bucket, path=dir_path)
+            if not files:
+                return False
+            for file in files:
+                if file["Name"] == name:
+                    return True
+            return False
+        except RCloneErr:
+            return False
+
+    def cp(self, source="", bucket="", target="", public=False):
+        rclone_target = f'{self.remote}:{bucket}/{target}'
         acl = ""
         if public:
             acl = "--s3-acl public-read"
-        envs, command = self.cmd(command=f'copy {source} {target} {acl}')
+        envs, command = self.cmd(command=f'copy {source} {rclone_target} {acl}')
         err, out = Rclone.__run(command=command, envs=envs)
         if err:
             raise RCloneErr(f'Could not copy files: {err}')
         if out:
             print(out)
 
-    def mv(self, source="", target="", public=False):
+    def mv(self, source="", bucket="", target="", public=False):
+        rclone_target = f'{self.remote}:{bucket}/{target}'
         acl = ""
         if public:
             acl = "--s3-acl public-read"
-        envs, command = self.cmd(command=f'moveto {source} {target} {acl}')
+        envs, command = self.cmd(command=f'moveto {source} {rclone_target} {acl}')
         err, out = Rclone.__run(command=command, envs=envs)
         if err:
             raise RCloneErr(f'Could not move files: {err}')
         if out:
             print(out)
 
-    def mvf(self, source="", target="", public=False):
+    def mvf(self, source="", bucket="", target="", public=False):
+        rclone_target = f'{self.remote}:{bucket}/{target}'
         acl = ""
         if public:
             acl = "--s3-acl public-read"
-        envs, command = self.cmd(command=f'move {source} {target} {acl}')
+        envs, command = self.cmd(command=f'move {source} {rclone_target} {acl}')
         err, out = Rclone.__run(command=command, envs=envs)
         if err:
             raise RCloneErr(f'Could not move files: {err}')
         if out:
             print(out)
 
-    def exists(self, dir_path="", name=""):
-        files = self.ls(path=dir_path)
-        if not files:
-            return False
-        for file in files:
-            if file["Name"] == name:
-                return True
-        return False
+    def mkd(self, bucket="", path=""):
+        rclone_path = f'{self.remote}:{bucket}/{path}'
+        envs, command = self.cmd(command=f'mkdir {rclone_path}')
+        err, out = Rclone.__run(command=command, envs=envs)
+        if err:
+            raise RCloneErr(f'Could not create the directory: {err}')
+        if out:
+            print(out)
 
-    def rm(self, path=""):
-        envs, command = self.cmd(command=f'delete {path}')
+    def rm(self, bucket="", path=""):
+        rclone_path = f'{self.remote}:{bucket}/{path}'
+        envs, command = self.cmd(command=f'delete {rclone_path}')
         err, out = Rclone.__run(command=command, envs=envs)
         if err:
             raise RCloneErr(f'Could not remove files: {err}')
         if out:
             print(out)
 
-    def rmd(self, path=""):
-        envs, command = self.cmd(command=f'delete --rmdirs {path}')
+    def rmd(self, bucket="", path=""):
+        rclone_path = f'{self.remote}:{bucket}/{path}'
+        envs, command = self.cmd(command=f'delete --rmdirs {rclone_path}')
         err, out = Rclone.__run(command=command, envs=envs)
         if err:
             raise RCloneErr(f'Could not remove files: {err}')
