@@ -68,18 +68,17 @@ class Rclone:
             return json.loads(out)
 
     def exists(self, bucket="", path=""):
-        rclone_path = f'{self.remote}:{path}'
-        parent_ = Path(path).parent
-        base_ = os.path.basename(path)
         try:
-            files = self.ls(bucket=bucket, path=parent_)
-            if not files:
+            rclone_path = f'{self.remote}:{bucket}/{path}'
+            envs, command = self.cmd(command=f'lsjson {rclone_path}')
+            err, out = Rclone.__run(command=command, envs=envs)
+            if err:
                 return False
-            for file in files:
-                if file["Name"] == base_:
-                    return True
-            return False
-        except RCloneErr:
+            elif out:
+                return True
+            else:
+                return False
+        except RCloneErr as e:
             return False
 
     def cp(self, source="", target="", public=False):
