@@ -1,6 +1,7 @@
 import os
 import json
 import subprocess
+from pathlib import Path
 
 class RCloneErr(Exception):
     def __init__(self, message=""):
@@ -66,14 +67,16 @@ class Rclone:
         if out:
             return json.loads(out)
 
-    def exists(self, bucket="", dir_path="", name=""):
-        rclone_path = f'{self.remote}:{bucket}/{dir_path}'
+    def exists(self, bucket="", path=""):
+        rclone_path = f'{self.remote}:{path}'
+        parent_ = Path(path).parent
+        base_ = os.path.basename(path)
         try:
-            files = self.ls(bucket=bucket, path=dir_path)
+            files = self.ls(bucket=bucket, path=parent_)
             if not files:
                 return False
             for file in files:
-                if file["Name"] == name:
+                if file["Name"] == base_:
                     return True
             return False
         except RCloneErr:
