@@ -79,36 +79,33 @@ class Rclone:
         except RCloneErr:
             return False
 
-    def cp(self, source="", bucket="", target="", public=False):
-        rclone_target = f'{self.remote}:{bucket}/{target}'
+    def cp(self, source="", target="", public=False):
         acl = ""
         if public:
             acl = "--s3-acl public-read"
-        envs, command = self.cmd(command=f'copy {source} {rclone_target} {acl}')
+        envs, command = self.cmd(command=f'copy {source} {target} {acl}')
         err, out = Rclone.__run(command=command, envs=envs)
         if err:
             raise RCloneErr(f'Could not copy files: {err}')
         if out:
             print(out)
 
-    def mv(self, source="", bucket="", target="", public=False):
-        rclone_target = f'{self.remote}:{bucket}/{target}'
+    def mv(self, source="", target="", public=False):
         acl = ""
         if public:
             acl = "--s3-acl public-read"
-        envs, command = self.cmd(command=f'moveto {source} {rclone_target} {acl}')
+        envs, command = self.cmd(command=f'moveto {source} {target} {acl}')
         err, out = Rclone.__run(command=command, envs=envs)
         if err:
             raise RCloneErr(f'Could not move files: {err}')
         if out:
             print(out)
 
-    def mvf(self, source="", bucket="", target="", public=False):
-        rclone_target = f'{self.remote}:{bucket}/{target}'
+    def mvf(self, source="", target="", public=False):
         acl = ""
         if public:
             acl = "--s3-acl public-read"
-        envs, command = self.cmd(command=f'move {source} {rclone_target} {acl}')
+        envs, command = self.cmd(command=f'move {source} {target} {acl}')
         err, out = Rclone.__run(command=command, envs=envs)
         if err:
             raise RCloneErr(f'Could not move files: {err}')
