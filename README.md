@@ -20,7 +20,7 @@ py install --from github pythonalta/rclone
 
 # Usage
 
-Create a `rclone.conf` file somewhere inside your project, defining its remote metadata, as follows:
+Create a `rclone.conf` file somewhere inside your project, defining the remotes, as follows:
 ```
 [<your-remote-name>]
 type = s3
@@ -45,15 +45,16 @@ MY_RCLONE_ACCESS_SECRET="<you-provider-access-secret>"
 ```python
 from rclone import Rclone
 
-# source the envs as you like, then initialize the class
+# Source the envs as you like and initialize the class
 rclone = Rclone(
     access_id=MY_RCLONE_ACCESS_ID,
     access_secret=MY_RCLONE_ACCESS_SECRET,
-    remote="my_remote",
+    remote="<your-remote-name>",
     conf_file="/path/to/rclone.conf".
 )
 
-# execute some command and collects the output
+# Then execute some command and collects the output.
+# For example, to list files and receive json output:
 files = rclone.ls(
     path=f"{rclone.remote}:/path/to/somewhere"
 )
